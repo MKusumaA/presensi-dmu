@@ -20,11 +20,11 @@ final class AttendanceController extends Controller
     {
         $rawToken = Str::random(64);
         
-        QrToken::truncate(); 
+        QrToken::where('expires_at', '<', Carbon::now())->delete();
 
         QrToken::create([
             'token_hash' => hash('sha256', $rawToken),
-            'expires_at' => Carbon::now()->addSeconds(15)
+            'expires_at' => Carbon::now()->addSeconds(60)
         ]);
 
         return response()->json(['token' => $rawToken], Response::HTTP_CREATED);
@@ -33,19 +33,22 @@ final class AttendanceController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'qr_token' => ['required', 'string', 'size:64']
+            'qr_token' => ['required', 'string']
         ]);
 
         return DB::transaction(function () use ($validated, $request): RedirectResponse {
-            $hashedToken = hash('sha256', $validated['qr_token']);
+            $rawToken = trim($validated['qr_token']);
+            $hashedToken = hash('sha256', $rawToken);
 
-            $qrToken = QrToken::where('token_hash', $hashedToken)
-                ->where('expires_at', '>=', Carbon::now())
-                ->lockForUpdate()
-                ->first();
+            $qrToken = QrToken::where('token_hash', $hashedToken)->first();
 
             if (!$qrToken) {
-                abort(Response::HTTP_FORBIDDEN);
+                // Hapus abort(), ganti dengan redirect + pesan error UI
+                return redirect()->route('attendance.scan.view')->with('error', 'Token kadaluarsa. Layar mungkin sudah berganti QR.');
+            }
+
+            if ($qrToken->expires_at->isPast()) {
+                return redirect()->route('attendance.scan.view')->with('error', 'Waktu scan habis. Silakan scan QR yang baru.');
             }
 
             $qrToken->delete();
@@ -61,7 +64,7 @@ final class AttendanceController extends Controller
                 'user_agent' => $request->userAgent()
             ]);
 
-            return redirect()->route('dashboard')->with('success', 'Attendance securely verified.');
+            return redirect()->route('attendance.scan.view')->with('success', 'Berhasil melakukan presensi!');
         });
     }
 }
