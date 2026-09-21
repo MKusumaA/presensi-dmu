@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Scan Presensi</title>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body style="font-family: sans-serif; background-color: #f3f4f6; margin: 0; padding: 2rem; display: flex; justify-content: center; align-items: center; min-height: 100vh;">
     <div style="background: white; padding: 2rem; border-radius: 1rem; width: 100%; max-width: 450px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
@@ -65,5 +66,36 @@
             </script>
         @endif
     </div>
+
+    <!-- SweetAlert2 Notifikasi -->
+    @if(session('success'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Absen Berhasil!',
+                    text: "{{ session('success') }}",
+                    showConfirmButton: false,
+                    timer: 2500,
+                    backdrop: `
+                        rgba(0,0,123,0.4)
+                    `
+                });
+            });
+        </script>
+    @endif
+
+    @if(session('error'))
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal!',
+                    text: "{{ session('error') }}",
+                    confirmButtonColor: '#ef4444',
+                });
+            });
+        </script>
+    @endif
 </body>
 </html>

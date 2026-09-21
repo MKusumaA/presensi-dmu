@@ -41,6 +41,26 @@
                 Masuk ke Sistem
             </button>
         </form>
+
+        <div class="mt-6 text-center">
+            <a href="{{ route('kiosk.qr') }}" class="text-sm text-blue-600 hover:underline font-medium">
+                Buka Layar QR Absensi Pagi
+            </a>
+        </div>
+        
     </div>
+    @if(session('error'))
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Akses Ditolak!',
+                    text: "{{ session('error') }}",
+                    confirmButtonColor: '#ef4444',
+                });
+            });
+        </script>
+    @endif
 </body>
 </html>

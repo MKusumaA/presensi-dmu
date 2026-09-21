@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Support\Facades\Auth;
 
 final class AttendanceController extends Controller
 {
@@ -63,8 +64,23 @@ final class AttendanceController extends Controller
                 'ip_address' => $request->ip(),
                 'user_agent' => $request->userAgent()
             ]);
-
             return redirect()->route('attendance.scan.view')->with('success', 'Berhasil melakukan presensi!');
         });
+
+    }
+    
+    public function scanView()
+    {
+        // Membuka halaman kamera untuk scan QR
+        return view('presensi.ScanQr');
+    }
+
+    public function dashboardKaryawan()
+    {
+        $riwayat_absen = Presensi::where('user_id', Auth::id())
+                                ->orderBy('waktu_absen', 'desc')
+                                ->get();
+
+        return view('presensi.karyawan_dashboard', compact('riwayat_absen'));
     }
 }

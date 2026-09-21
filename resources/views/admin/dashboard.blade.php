@@ -87,7 +87,6 @@
                                             @method('PATCH')
                                             <button type="submit" onclick="return confirm('Yakin ingin ACC presensi ini?')" class="bg-emerald-500 hover:bg-emerald-600 text-white px-3 py-1 rounded text-xs font-semibold transition-colors">ACC</button>
                                         </form>
-
                                         <!-- Tombol Tolak -->
                                         <form action="{{ route('admin.presensi.tolak', $presensi->id) }}" method="POST">
                                             @csrf
@@ -111,5 +110,20 @@
             </table>
         </div>
     </main>
+    <!-- SweetAlert2 Notifikasi Dashboard HRD -->
+    @if(session('success'))
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: "{{ session('success') }}",
+                    showConfirmButton: false,
+                    timer: 2000,
+                });
+            });
+        </script>
+    @endif
 </body>
 </html>
