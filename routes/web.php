@@ -90,5 +90,10 @@ Route::middleware('auth')->group(function () {
         // Export laporan bulanan
         Route::get('/admin/presensi/export/csv', [\App\Http\Controllers\AdminController::class, 'exportCsv'])
             ->name('admin.presensi.export.csv');
+
+        Route::patch('/admin/presensi/{id}/update-status', [\App\Http\Controllers\AdminController::class, 'updateStatus'])
+            ->name('admin.presensi.update-status');
     });
+
+
 });

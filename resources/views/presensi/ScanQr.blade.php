@@ -1,101 +1,49 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scan Presensi</title>
-    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <title>Scan Absensi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Include SweetAlert dan HTML5-QRCode Script yang sudah Anda pasang sebelumnya -->
 </head>
-<body style="font-family: sans-serif; background-color: #f3f4f6; margin: 0; padding: 2rem; display: flex; justify-content: center; align-items: center; min-height: 100vh;">
-    <div style="background: white; padding: 2rem; border-radius: 1rem; width: 100%; max-width: 450px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);">
-        
-        <!-- LOGIKA JIKA SUKSES -->
-        @if(session('success'))
-            <div style="text-align: center;">
-                <div style="font-size: 4rem; margin-bottom: 1rem;">✅</div>
-                <h2 style="color: #10b981; margin-bottom: 0.5rem;">Absen Berhasil!</h2>
-                <p style="color: #4b5563; margin-bottom: 2rem;">{{ session('success') }}</p>
-                <a href="{{ route('attendance.scan.view') }}" style="display: inline-block; padding: 0.75rem 1.5rem; background-color: #1f2937; color: white; text-decoration: none; border-radius: 0.5rem; font-weight: bold;">Tutup & Kembali</a>
+<body class="bg-gray-50 min-h-screen font-sans text-gray-800">
+
+    <!-- Header Mobile Sapaan & Logo -->
+    <div class="bg-white px-6 py-5 shadow-sm border-b border-gray-200">
+        <div class="flex justify-between items-center">
+            <div>
+                <p class="text-xs text-gray-500 font-medium uppercase tracking-wider">Selamat Datang,</p>
+                <h2 class="text-lg font-bold text-blue-900">{{ Auth::user()->name }}</h2>
             </div>
-        
-        <!-- LOGIKA AWAL / ERROR (Tampilkan Kamera) -->
-        @else
-            <h2 style="text-align: center; color: #1f2937; margin-bottom: 1.5rem;">Arahkan Kamera ke Layar</h2>
             
-            @if(session('error'))
-                <div style="background: #fee2e2; color: #ef4444; padding: 1rem; border-radius: 0.5rem; margin-bottom: 1.5rem; text-align: center; font-weight: bold;">
-                    ❌ {{ session('error') }}
-                </div>
-            @endif
-
-            <div id="reader" style="width: 100%;"></div>
-            
-            <p id="status-text" style="text-align: center; color: #10b981; font-weight: bold; display: none; margin-top: 1rem; font-size: 1.2rem;">
-                Berhasil membaca QR! Memproses...
-            </p>
-            
-            <form id="attendance-form" action="{{ route('attendance.scan') }}" method="POST" style="display: none;">
-                @csrf
-                <input type="hidden" name="qr_token" id="qr_token">
-            </form>
-
-            <script>
-                const html5QrcodeScanner = new Html5QrcodeScanner(
-                    "reader",
-                    { fps: 10, qrbox: { width: 250, height: 250 } },
-                    false
-                );
-
-                let isScanned = false; 
-
-                function onScanSuccess(decodedText) {
-                    if (isScanned) return; 
-                    isScanned = true; 
-                    
-                    document.getElementById('reader').style.display = 'none';
-                    document.getElementById('status-text').style.display = 'block';
-
-                    html5QrcodeScanner.clear();
-
-                    document.getElementById('qr_token').value = decodedText;
-                    document.getElementById('attendance-form').submit();
-                }
-
-                html5QrcodeScanner.render(onScanSuccess);
-            </script>
-        @endif
+            <!-- Logo Perusahaan dengan Penanganan Ukuran Otomatis -->
+            <div>
+                <img src="{{ asset('logos/dmu.png') }}" alt="Logo Perusahaan" class="h-10 w-auto object-contain">
+            </div>
+        </div>
     </div>
 
-    <!-- SweetAlert2 Notifikasi -->
-    @if(session('success'))
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Absen Berhasil!',
-                    text: "{{ session('success') }}",
-                    showConfirmButton: false,
-                    timer: 2500,
-                    backdrop: `
-                        rgba(0,0,123,0.4)
-                    `
-                });
-            });
-        </script>
-    @endif
+    <!-- Area Kamera -->
+    <div class="max-w-md mx-auto p-4 mt-4">
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div class="bg-blue-50 px-4 py-3 border-b border-blue-100">
+                <h3 class="text-center font-semibold text-blue-800">Arahkan Kamera ke Layar Kiosk</h3>
+            </div>
+            
+            <div class="p-4">
+                <!-- Wrapper agar kamera pas di layar HP -->
+                <div id="reader" class="w-full h-auto rounded-lg overflow-hidden border-2 border-dashed border-gray-300"></div>
+            </div>
+        </div>
 
-    @if(session('error'))
-        <script>
-            document.addEventListener('DOMContentLoaded', function() {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Gagal!',
-                    text: "{{ session('error') }}",
-                    confirmButtonColor: '#ef4444',
-                });
-            });
-        </script>
-    @endif
+        <div class="mt-6 text-center">
+            <a href="{{ route('karyawan.dashboard') }}" class="text-sm font-medium text-gray-500 hover:text-gray-800">
+                &larr; Kembali ke Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- Pastikan Form POST dan Script Html5QrcodeScanner Anda ada di bawah sini -->
 </body>
 </html>

@@ -1,116 +1,172 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard HRD - DMU</title>
+    <title>Dashboard HRD - PT Daya Matahari Utama</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-slate-50 font-sans antialiased">
-    
-    <!-- Navbar -->
-    <nav class="bg-white shadow-sm px-6 py-4 flex justify-between items-center">
-        <div>
-            <h1 class="text-xl font-bold text-slate-800">HRIS Dashboard</h1>
-            <p class="text-xs text-slate-500">PT Daya Matahari Utama</p>
-        </div>
-        <div class="flex items-center gap-4">
-            <span class="text-sm font-medium text-slate-600">Halo, {{ auth()->user()->name }}</span>
+<body class="bg-gray-50 text-gray-800 font-sans antialiased">
+
+    <nav class="bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center shadow-sm">
+        <div class="font-bold text-xl text-blue-700">HRIS Portal</div>
+        <div class="flex items-center space-x-4">
+            <span class="text-sm font-medium text-gray-600">Administrator (HRD)</span>
             <form action="{{ route('logout') }}" method="POST">
                 @csrf
-                <button type="submit" class="text-sm bg-red-50 text-red-600 hover:bg-red-100 px-4 py-2 rounded-lg font-medium transition-colors">
-                    Logout
-                </button>
+                <button type="submit" class="text-sm text-red-600 hover:text-red-800 font-medium">Logout</button>
             </form>
         </div>
     </nav>
 
-    <!-- Content -->
-    <main class="max-w-7xl mx-auto px-6 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
-        @if(session('success'))
-            <div class="bg-emerald-50 text-emerald-600 p-4 rounded-lg mb-6 text-sm font-semibold border border-emerald-200">
-                {{ session('success') }}
-            </div>
-        @endif
-        @if(session('error'))
-            <div class="bg-red-50 text-red-600 p-4 rounded-lg mb-6 text-sm font-semibold border border-red-200">
-                {{ session('error') }}
-            </div>
-        @endif
-
-        <div class="flex justify-between items-end mb-6">
+        <!-- Header dengan Tombol Export -->
+        <div class="flex justify-between items-center mb-8">
             <div>
-                <h2 class="text-2xl font-bold text-slate-800">Data Presensi Harian</h2>
-                <p class="text-slate-500 text-sm mt-1">Kelola dan verifikasi kehadiran karyawan</p>
+                <h2 class="text-2xl font-bold text-gray-900">Dashboard Manajemen Presensi</h2>
+                <p class="text-gray-500 text-sm mt-1">Kelola data kehadiran harian dan koreksi status karyawan.</p>
             </div>
-            <!-- Tombol Export CSV -->
-            <a href="{{ route('admin.presensi.export.csv') }}" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg text-sm font-medium shadow-sm transition-colors flex items-center gap-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                Export Laporan (CSV)
-            </a>
+            <div>
+                <a href="{{ route('admin.presensi.export.csv') }}" class="inline-block bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow-sm text-sm font-medium transition">
+                    Export Laporan (CSV)
+                </a>
+            </div>
         </div>
 
-        <!-- Table Card -->
-        <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-            <table class="w-full text-left text-sm text-slate-600">
-                <thead class="bg-slate-50 border-b border-slate-200 text-slate-700">
-                    <tr>
-                        <th class="px-6 py-4 font-semibold">Nama Karyawan</th>
-                        <th class="px-6 py-4 font-semibold">Waktu Scan</th>
-                        <th class="px-6 py-4 font-semibold">IP Address</th>
-                        <th class="px-6 py-4 font-semibold">Status</th>
-                        <th class="px-6 py-4 font-semibold text-center">Aksi HRD</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-100">
-                    @forelse ($presensis as $presensi)
-                        <tr class="hover:bg-slate-50 transition-colors">
-                            <td class="px-6 py-4 font-medium text-slate-800">{{ $presensi->user->name }}</td>
-                            <td class="px-6 py-4">{{ \Carbon\Carbon::parse($presensi->waktu_absen)->format('d M Y, H:i:s') }}</td>
-                            <td class="px-6 py-4 text-xs font-mono bg-slate-100 rounded px-2 py-1 mx-6 inline-block mt-3">{{ $presensi->ip_address }}</td>
-                            <td class="px-6 py-4">
-                                @if($presensi->status === 'Hadir')
-                                    <span class="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-bold">Hadir</span>
-                                @elseif($presensi->status === 'Menunggu ACC')
-                                    <span class="bg-amber-100 text-amber-700 px-3 py-1 rounded-full text-xs font-bold">Menunggu ACC</span>
-                                @else
-                                    <span class="bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-bold">{{ $presensi->status }}</span>
-                                @endif
+        <!-- BAGIAN 1: PRESENSI HARI INI -->
+        <div class="bg-white rounded-lg shadow-sm border border-blue-100 mb-8 overflow-hidden">
+            <div class="bg-blue-50 px-6 py-4 border-b border-blue-100 flex justify-between items-center">
+                <h3 class="text-lg font-semibold text-blue-900">
+                    Data Presensi Hari Ini ({{ \Carbon\Carbon::today()->format('d F Y') }})
+                </h3>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-50 text-gray-600 text-sm border-b border-gray-200">
+                            <th class="p-4 font-semibold">Nama Karyawan</th>
+                            <th class="p-4 font-semibold">Waktu Scan</th>
+                            <th class="p-4 font-semibold">Status</th>
+                            <th class="p-4 font-semibold text-center">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($presensiHariIni as $absen)
+                        <tr class="border-b border-gray-100 hover:bg-gray-50 transition">
+                            <td class="p-4 font-medium text-gray-800">{{ $absen->user->name }}</td>
+                            <td class="p-4 text-gray-600">{{ $absen->created_at->format('H:i:s') }} WIB</td>
+                            <td class="p-4">
+                                <span class="px-3 py-1 text-xs font-semibold rounded-full border bg-gray-100 text-gray-700">
+                                    {{ $absen->status ?? 'Menunggu' }}
+                                </span>
                             </td>
-                            <td class="px-6 py-4 text-center">
-                                @if($presensi->status === 'Menunggu ACC')
-                                    <div class="flex items-center justify-center gap-2">
-                                        <!-- Tombol ACC -->
-                                        <form action="{{ route('admin.presensi.acc', $presensi->id) }}" method="POST">
-                                            @csrf
-                                            @method('PATCH')
-                                            <button type="submit" onclick="return confirm('Yakin ingin ACC presensi ini?')" class="bg-emerald-500 hover:bg-emerald-600 text-white px-3 py-1 rounded text-xs font-semibold transition-colors">ACC</button>
-                                        </form>
-                                        <!-- Tombol Tolak -->
-                                        <form action="{{ route('admin.presensi.tolak', $presensi->id) }}" method="POST">
-                                            @csrf
-                                            @method('PATCH')
-                                            <button type="submit" onclick="return confirm('Yakin ingin MENOLAK presensi ini?')" class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-xs font-semibold transition-colors">Tolak</button>
-                                        </form>
-                                    </div>
-                                @else
-                                    <span class="text-slate-400 text-xs italic">- Selesai -</span>
-                                @endif
+                            <td class="p-4 text-center">
+                                <button onclick="openModal('{{ $absen->id }}')" class="text-sm text-blue-600 border border-blue-600 hover:bg-blue-50 px-3 py-1.5 rounded transition font-medium">
+                                    Edit Status
+                                </button>
                             </td>
                         </tr>
-                    @empty
+                        @empty
                         <tr>
-                            <td colspan="5" class="px-6 py-8 text-center text-slate-500">
-                                Belum ada data absensi hari ini.
+                            <td colspan="4" class="p-8 text-center text-gray-500 italic">Belum ada data presensi hari ini.</td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- BAGIAN 2: RIWAYAT SEBELUMNYA -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <div class="bg-gray-100 px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-semibold text-gray-800">
+                    Riwayat Presensi Sebelumnya
+                </h3>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-gray-50 text-gray-600 text-sm border-b border-gray-200">
+                            <th class="p-4 font-semibold">Tanggal</th>
+                            <th class="p-4 font-semibold">Nama Karyawan</th>
+                            <th class="p-4 font-semibold">Status Akhir</th>
+                            <th class="p-4 font-semibold text-center">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($riwayatPresensi as $riwayat)
+                        <tr class="border-b border-gray-100 hover:bg-gray-50 transition">
+                            <td class="p-4 text-gray-600">{{ $riwayat->created_at->format('d M Y') }}</td>
+                            <td class="p-4 font-medium text-gray-800">{{ $riwayat->user->name }}</td>
+                            <td class="p-4 text-gray-700 font-medium">{{ $riwayat->status }}</td>
+                            <td class="p-4 text-center">
+                                <button onclick="openModal('{{ $riwayat->id }}')" class="text-sm text-gray-600 border border-gray-400 hover:bg-gray-100 px-3 py-1.5 rounded transition font-medium">
+                                    Koreksi Data
+                                </button>
                             </td>
                         </tr>
-                    @endforelse
-                </tbody>
-            </table>
+                        @empty
+                        <tr>
+                            <td colspan="4" class="p-8 text-center text-gray-500 italic">Belum ada riwayat data.</td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+            <div class="p-4 bg-gray-50 border-t border-gray-200">
+                {{ $riwayatPresensi->links() }}
+            </div>
         </div>
-    </main>
-    <!-- SweetAlert2 Notifikasi Dashboard HRD -->
+    </div>
+
+    <!-- Modal Edit Status (Hidden by default) -->
+    <div id="statusModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 hidden items-center justify-center z-50">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-md mx-4 overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-gray-900">Koreksi Status Kehadiran</h3>
+                <button onclick="closeModal()" class="text-gray-400 hover:text-gray-600 font-bold text-xl">&times;</button>
+            </div>
+            <form id="editForm" method="POST" action="">
+                @csrf
+                @method('PATCH')
+                <div class="px-6 py-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Pilih Keterangan Baru</label>
+                    <select name="status" class="w-full border border-gray-300 rounded-md shadow-sm px-3 py-2 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-sm">
+                        <option value="Hadir">Hadir (Tepat Waktu)</option>
+                        <option value="MT">MT (Masuk Telat)</option>
+                        <option value="Sakit">Sakit</option>
+                        <option value="Ijin">Ijin</option>
+                        <option value="TMDL">TMDL (Tidak Masuk Dinas Luar)</option>
+                        <option value="TMTD">TMTD (Tidak Masuk Tanpa Keterangan)</option>
+                        <option value="TA">TA (Tidak Absen)</option>
+                        <option value="Ditolak (Alpa)">Ditolak (Alpa)</option>
+                    </select>
+                </div>
+                <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end space-x-3">
+                    <button type="button" onclick="closeModal()" class="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-md text-sm font-medium hover:bg-gray-50 transition">Batal</button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 transition">Simpan Perubahan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openModal(id) {
+            document.getElementById('statusModal').classList.remove('hidden');
+            document.getElementById('statusModal').classList.add('flex');
+            document.getElementById('editForm').action = '/admin/presensi/' + id + '/update-status';
+        }
+
+        function closeModal() {
+            document.getElementById('statusModal').classList.add('hidden');
+            document.getElementById('statusModal').classList.remove('flex');
+        }
+    </script>
+
+    <!-- SweetAlert2 Notifikasi -->
     @if(session('success'))
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script>
