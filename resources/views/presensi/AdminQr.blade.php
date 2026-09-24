@@ -41,6 +41,44 @@
         </div>
     </div>
 
-    <!-- Pastikan script auto-refresh QR Code bawaan Anda diletakkan di bawah sini -->
+    <!-- Script Auto-Refresh QR Code -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const qrContainer = document.getElementById('qrcode');
+            let qrCodeInstance = null;
+
+            const generateQrCode = async () => {
+                try {
+                    const response = await fetch('{{ route('qr.generate') }}');
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch QR token');
+                    }
+                    
+                    const data = await response.json();
+                    
+                    if (qrCodeInstance !== null) {
+                        qrCodeInstance.clear();
+                        qrContainer.innerHTML = '';
+                    }
+
+                    qrCodeInstance = new QRCode(qrContainer, {
+                        text: data.token,
+                        width: 250,
+                        height: 250,
+                        colorDark: '#1e3a8a',
+                        colorLight: '#ffffff',
+                        correctLevel: QRCode.CorrectLevel.H
+                    });
+                } catch (error) {
+                    console.error('Error generating QR Code:', error);
+                    alert('Gagal memuat QR Code. Pastikan koneksi jaringan stabil.');
+                }
+            };
+
+            generateQrCode();
+            setInterval(generateQrCode, 50000); // 50 seconds
+        });
+    </script>
 </body>
 </html>

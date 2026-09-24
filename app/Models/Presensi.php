@@ -29,5 +29,9 @@ class Presensi extends Model
         return $this->belongsTo(User::class);
     }
 
-    
+    public function scopeCurrentMonth($query)
+    {
+        return $query->whereMonth('waktu_absen', \Carbon\Carbon::now()->month)
+                     ->whereYear('waktu_absen', \Carbon\Carbon::now()->year);
+    }
 }

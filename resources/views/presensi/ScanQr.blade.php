@@ -44,6 +44,35 @@
         </div>
     </div>
 
-    <!-- Pastikan Form POST dan Script Html5QrcodeScanner Anda ada di bawah sini -->
+    <!-- Hidden form for submitting scan result -->
+    <form id="scan-form" action="{{ route('attendance.scan') }}" method="POST" class="hidden">
+        @csrf
+        <input type="hidden" name="qr_token" id="qr_token_input">
+    </form>
+
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const scanForm = document.getElementById('scan-form');
+            const tokenInput = document.getElementById('qr_token_input');
+            const html5QrCode = new Html5Qrcode("reader");
+            const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+            
+            const onScanSuccess = (decodedText, decodedResult) => {
+                html5QrCode.stop().then(() => {
+                    tokenInput.value = decodedText;
+                    scanForm.submit();
+                }).catch((err) => {
+                    console.error("Failed to stop scanner", err);
+                });
+            };
+
+            html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess)
+                .catch((err) => {
+                    console.error("Kamera error:", err);
+                    alert("Akses kamera ditolak atau perangkat tidak mendukung. Mohon izinkan akses kamera.");
+                });
+        });
+    </script>
 </body>
 </html>

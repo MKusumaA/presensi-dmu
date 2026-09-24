@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreAttendanceRequest;
 use App\Models\Presensi;
 use App\Models\QrToken;
 use Carbon\Carbon;
@@ -31,41 +32,43 @@ final class AttendanceController extends Controller
         return response()->json(['token' => $rawToken], Response::HTTP_CREATED);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(StoreAttendanceRequest $request): RedirectResponse
     {
-        $validated = $request->validate([
-            'qr_token' => ['required', 'string']
-        ]);
+        $validated = $request->validated();
 
-        return DB::transaction(function () use ($validated, $request): RedirectResponse {
-            $rawToken = trim($validated['qr_token']);
-            $hashedToken = hash('sha256', $rawToken);
+        try {
+            return DB::transaction(function () use ($validated, $request): RedirectResponse {
+                $rawToken = trim($validated['qr_token']);
+                $hashedToken = hash('sha256', $rawToken);
 
-            $qrToken = QrToken::where('token_hash', $hashedToken)->first();
+                $qrToken = QrToken::where('token_hash', $hashedToken)->first();
 
-            if (!$qrToken) {
-                // Hapus abort(), ganti dengan redirect + pesan error UI
-                return redirect()->route('attendance.scan.view')->with('error', 'Token kadaluarsa. Layar mungkin sudah berganti QR.');
-            }
+                if (!$qrToken) {
+                    return redirect()->route('attendance.scan.view')->with('error', 'Token kadaluarsa. Layar mungkin sudah berganti QR.');
+                }
 
-            if ($qrToken->expires_at->isPast()) {
-                return redirect()->route('attendance.scan.view')->with('error', 'Waktu scan habis. Silakan scan QR yang baru.');
-            }
+                if ($qrToken->expires_at->isPast()) {
+                    return redirect()->route('attendance.scan.view')->with('error', 'Waktu scan habis. Silakan scan QR yang baru.');
+                }
 
-            $qrToken->delete();
+                $qrToken->delete();
 
-            $timeLimit = Carbon::today()->setTime(8, 15, 0);
-            $status = Carbon::now()->lessThanOrEqualTo($timeLimit) ? 'Hadir' : 'Menunggu ACC';
+                $timeLimit = Carbon::today()->setTime(8, 15, 0);
+                $status = Carbon::now()->lessThanOrEqualTo($timeLimit) ? 'Hadir' : 'Menunggu ACC';
 
-            Presensi::create([
-                'user_id' => $request->user()->id,
-                'waktu_absen' => Carbon::now(),
-                'status' => $status,
-                'ip_address' => $request->ip(),
-                'user_agent' => $request->userAgent()
-            ]);
-            return redirect()->route('attendance.scan.view')->with('success', 'Berhasil melakukan presensi!');
-        });
+                Presensi::create([
+                    'user_id' => $request->user()->id,
+                    'waktu_absen' => Carbon::now(),
+                    'status' => $status,
+                    'ip_address' => $request->ip(),
+                    'user_agent' => $request->userAgent()
+                ]);
+                return redirect()->route('attendance.scan.view')->with('success', 'Berhasil melakukan presensi!');
+            });
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Attendance scan failed: ' . $e->getMessage());
+            return redirect()->route('attendance.scan.view')->with('error', 'Terjadi kesalahan sistem saat memproses presensi.');
+        }
 
     }
     
@@ -78,6 +81,7 @@ final class AttendanceController extends Controller
     public function dashboardKaryawan()
     {
         $riwayat_absen = Presensi::where('user_id', Auth::id())
+                                ->currentMonth()
                                 ->orderBy('waktu_absen', 'desc')
                                 ->get();
 
