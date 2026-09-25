@@ -93,6 +93,9 @@ Route::middleware('auth')->group(function () {
 
         Route::patch('/admin/presensi/{id}/update-status', [\App\Http\Controllers\AdminController::class, 'updateStatus'])
             ->name('admin.presensi.update-status');
+
+        Route::post('/admin/karyawan', [\App\Http\Controllers\AdminController::class, 'storeKaryawan'])
+            ->name('admin.karyawan.store');
     });
 
 

@@ -28,7 +28,7 @@
     <div class="max-w-md mx-auto p-4 mt-4">
         <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             <div class="bg-blue-50 px-4 py-3 border-b border-blue-100">
-                <h3 class="text-center font-semibold text-blue-800">Arahkan Kamera ke Layar Kiosk</h3>
+                <h3 class="text-center font-semibold text-blue-800">Arahkan Kamera ke QR Code</h3>
             </div>
             
             <div class="p-4">

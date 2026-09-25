@@ -19,13 +19,13 @@
         <div class="bg-white p-8 rounded-2xl shadow-2xl flex flex-col items-center transform transition hover:scale-105">
             
             <!-- Tempat QR Code dirender oleh JavaScript yang sudah ada -->
-            <div id="qr-container" class="w-72 h-72 bg-gray-100 flex justify-center items-center rounded-lg border-2 border-dashed border-gray-300">
+            <div id="qr-container" class="w-[450px] h-[450px] bg-gray-100 flex justify-center items-center rounded-lg border-4 border-dashed border-gray-300">
                 <!-- Jika menggunakan plugin QR lama, biarkan tag div/canvas bawaannya di sini -->
                 <div id="qrcode"></div>
             </div>
 
-            <p class="mt-6 text-sm font-semibold text-red-600 animate-pulse">
-                Token berganti otomatis demi keamanan...
+            <p class="mt-6 text-2xl font-bold text-red-600 animate-pulse">
+                QR Code berganti dalam <span id="timer">20</span> detik
             </p>
         </div>
     </div>
@@ -46,7 +46,11 @@
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const qrContainer = document.getElementById('qrcode');
+            let timerElement = document.getElementById('timer');
+            const countdownText = timerElement.parentNode;
             let qrCodeInstance = null;
+            let countdown = 20;
+            let timerInterval;
 
             const generateQrCode = async () => {
                 try {
@@ -64,20 +68,45 @@
 
                     qrCodeInstance = new QRCode(qrContainer, {
                         text: data.token,
-                        width: 250,
-                        height: 250,
+                        width: 400,
+                        height: 400,
                         colorDark: '#1e3a8a',
                         colorLight: '#ffffff',
                         correctLevel: QRCode.CorrectLevel.H
                     });
+
+                    // Reset hitungan dan restart timer setelah AJAX sukses & QR dirender
+                    countdown = 20;
+                    countdownText.innerHTML = 'QR Code berganti dalam <span id="timer">20</span> detik';
+                    timerElement = document.getElementById('timer');
+                    startTimer();
                 } catch (error) {
                     console.error('Error generating QR Code:', error);
                     alert('Gagal memuat QR Code. Pastikan koneksi jaringan stabil.');
+                    
+                    // Restart timer kembali meskipun gagal agar tidak hang
+                    countdown = 20;
+                    countdownText.innerHTML = 'QR Code berganti dalam <span id="timer">20</span> detik';
+                    timerElement = document.getElementById('timer');
+                    startTimer();
                 }
             };
 
+            const startTimer = () => {
+                timerInterval = setInterval(() => {
+                    countdown--;
+                    if (countdown <= 0) {
+                        clearInterval(timerInterval);
+                        countdownText.innerHTML = 'Memperbarui QR Code...';
+                        generateQrCode();
+                    } else {
+                        if (timerElement) timerElement.innerText = countdown;
+                    }
+                }, 1000);
+            };
+
+            // Panggil fungsi saat pertama kali dimuat
             generateQrCode();
-            setInterval(generateQrCode, 50000); // 50 seconds
         });
     </script>
 </body>

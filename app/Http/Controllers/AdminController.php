@@ -89,4 +89,24 @@ final class AdminController extends Controller
 
         return response()->stream($callback, 200, $headers);
     }
+
+    public function storeKaryawan(\Illuminate\Http\Request $request)
+    {
+        $request->validate([
+            'name' => 'required',
+            'email' => 'required|unique:users',
+            'password' => 'required|min:8',
+            'company_entity' => 'required',
+        ]);
+
+        \App\Models\User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => \Illuminate\Support\Facades\Hash::make($request->password),
+            'role' => 'karyawan',
+            'company_entity' => $request->company_entity,
+        ]);
+
+        return redirect()->back()->with('success', 'Akun karyawan baru berhasil ditambahkan.');
+    }
 }

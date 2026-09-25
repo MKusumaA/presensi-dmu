@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Events\PresensiMasuk;
 use App\Http\Requests\StoreAttendanceRequest;
 use App\Models\Presensi;
 use App\Models\QrToken;
@@ -56,13 +57,15 @@ final class AttendanceController extends Controller
                 $timeLimit = Carbon::today()->setTime(8, 15, 0);
                 $status = Carbon::now()->lessThanOrEqualTo($timeLimit) ? 'Hadir' : 'Menunggu ACC';
 
-                Presensi::create([
+                $presensi = Presensi::create([
                     'user_id' => $request->user()->id,
                     'waktu_absen' => Carbon::now(),
                     'status' => $status,
                     'ip_address' => $request->ip(),
                     'user_agent' => $request->userAgent()
                 ]);
+
+                event(new PresensiMasuk($presensi));
                 return redirect()->route('attendance.scan.view')->with('success', 'Berhasil melakukan presensi!');
             });
         } catch (\Exception $e) {
