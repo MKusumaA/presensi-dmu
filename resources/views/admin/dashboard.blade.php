@@ -27,6 +27,9 @@
                 <p class="text-gray-500 text-sm mt-1">Kelola data kehadiran harian dan koreksi status karyawan.</p>
             </div>
             <div class="flex space-x-3">
+                <a href="{{ route('admin.karyawan.index') }}" class="inline-block bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded shadow-sm text-sm font-medium transition">
+                    Kelola Karyawan
+                </a>
                 <button onclick="openKaryawanModal()" class="inline-block bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow-sm text-sm font-medium transition">
                     + Tambah Karyawan
                 </button>

@@ -96,6 +96,15 @@ Route::middleware('auth')->group(function () {
 
         Route::post('/admin/karyawan', [\App\Http\Controllers\AdminController::class, 'storeKaryawan'])
             ->name('admin.karyawan.store');
+
+        Route::get('/admin/karyawan', [\App\Http\Controllers\AdminController::class, 'indexKaryawan'])
+            ->name('admin.karyawan.index');
+            
+        Route::put('/admin/karyawan/{id}', [\App\Http\Controllers\AdminController::class, 'updateKaryawan'])
+            ->name('admin.karyawan.update');
+            
+        Route::delete('/admin/karyawan/{id}', [\App\Http\Controllers\AdminController::class, 'destroyKaryawan'])
+            ->name('admin.karyawan.destroy');
     });
 
 

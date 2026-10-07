@@ -8,24 +8,32 @@ use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 
-class UserSeeder extends Seeder
+class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
         // Bikin Akun HRD
-        User::create([
-            'name' => 'Ibu Erlin (HR Manager)',
-            'email' => 'erlin@dmu.com',
-            'password' => Hash::make('password123'),
-            'role' => 'admin',
-        ]);
+        User::firstOrCreate(
+            ['email' => 'erlin@dmu.com'],
+            [
+                'name' => 'Ibu Erlin (HR Manager)',
+                'password' => Hash::make('password123'),
+                'role' => 'admin',
+            ]
+        );
 
         // Bikin Akun Karyawan
-        User::create([
-            'name' => 'Budi (Staff IT)',
-            'email' => 'budi@dmu.com',
-            'password' => Hash::make('password123'),
-            'role' => 'karyawan',
+        User::firstOrCreate(
+            ['email' => 'budi@dmu.com'],
+            [
+                'name' => 'Budi (Staff IT)',
+                'password' => Hash::make('password123'),
+                'role' => 'karyawan',
+            ]
+        );
+
+        $this->call([
+            PresensiSeeder::class,
         ]);
     }
 }

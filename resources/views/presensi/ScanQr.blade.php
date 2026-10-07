@@ -19,7 +19,13 @@
             
             <!-- Logo Perusahaan dengan Penanganan Ukuran Otomatis -->
             <div>
-                <img src="{{ asset('logos/dmu.png') }}" alt="Logo Perusahaan" class="h-10 w-auto object-contain">
+                @if(Auth::user()->company_entity == 'PT. RLW')
+                    <img src="{{ asset('images/logo-rlw.png') }}" alt="Logo Perusahaan" class="h-10 w-auto object-contain">
+                @elseif(Auth::user()->company_entity == 'PT. DMS')
+                    <img src="{{ asset('images/logo-dms.png') }}" alt="Logo Perusahaan" class="h-10 w-auto object-contain">
+                @else
+                    <img src="{{ asset('images/logo-dmu.png') }}" alt="Logo Perusahaan" class="h-10 w-auto object-contain">
+                @endif
             </div>
         </div>
     </div>
@@ -51,6 +57,7 @@
     </form>
 
     <script src="https://unpkg.com/html5-qrcode"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const scanForm = document.getElementById('scan-form');
@@ -72,6 +79,25 @@
                     console.error("Kamera error:", err);
                     alert("Akses kamera ditolak atau perangkat tidak mendukung. Mohon izinkan akses kamera.");
                 });
+
+            // SweetAlert2 Logic
+            @if(session('success'))
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil!',
+                    text: '{{ session('success') }}',
+                    confirmButtonColor: '#3085d6',
+                });
+            @endif
+
+            @if(session('error'))
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal!',
+                    text: '{{ session('error') }}',
+                    confirmButtonColor: '#d33',
+                });
+            @endif
         });
     </script>
 </body>

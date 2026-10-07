@@ -109,4 +109,36 @@ final class AdminController extends Controller
 
         return redirect()->back()->with('success', 'Akun karyawan baru berhasil ditambahkan.');
     }
+
+    public function indexKaryawan()
+    {
+        $karyawans = \App\Models\User::where('role', 'karyawan')->get();
+        return view('admin.karyawan-index', compact('karyawans'));
+    }
+
+    public function updateKaryawan(\Illuminate\Http\Request $request, int $id)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $id,
+            'company_entity' => 'required|string|max:255',
+        ]);
+
+        $karyawan = \App\Models\User::findOrFail($id);
+        $karyawan->update([
+            'name' => $request->name,
+            'email' => $request->email,
+            'company_entity' => $request->company_entity,
+        ]);
+
+        return redirect()->back()->with('success', 'Data karyawan berhasil diperbarui.');
+    }
+
+    public function destroyKaryawan(int $id)
+    {
+        $karyawan = \App\Models\User::findOrFail($id);
+        $karyawan->delete();
+
+        return redirect()->back()->with('success', 'Akun karyawan berhasil dihapus.');
+    }
 }
