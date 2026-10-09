@@ -20,11 +20,11 @@
             <!-- Logo Perusahaan dengan Penanganan Ukuran Otomatis -->
             <div>
                 @if(Auth::user()->company_entity == 'PT. RLW')
-                    <img src="{{ asset('images/logo-rlw.png') }}" alt="Logo Perusahaan" class="h-10 w-auto object-contain">
+                    <img src="/logos/rlw.png" alt="Logo Perusahaan" class="h-10 w-auto object-contain">
                 @elseif(Auth::user()->company_entity == 'PT. DMS')
-                    <img src="{{ asset('images/logo-dms.png') }}" alt="Logo Perusahaan" class="h-10 w-auto object-contain">
+                    <img src="/logos/dmg.png" alt="Logo Perusahaan" class="h-10 w-auto object-contain">
                 @else
-                    <img src="{{ asset('images/logo-dmu.png') }}" alt="Logo Perusahaan" class="h-10 w-auto object-contain">
+                    <img src="/logos/dmu.png" alt="Logo Perusahaan" class="h-10 w-auto object-contain">
                 @endif
             </div>
         </div>

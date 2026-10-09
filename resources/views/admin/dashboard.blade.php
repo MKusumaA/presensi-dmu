@@ -7,6 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-50 text-gray-800 font-sans antialiased">
+<?php /** @var \Illuminate\Database\Eloquent\Collection $presensiHariIni */ /** @var \Illuminate\Database\Eloquent\Collection $riwayatPresensi */ ?>
 
     <nav class="bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center shadow-sm">
         <div class="font-bold text-xl text-blue-700">HRIS Portal</div>
@@ -63,7 +64,7 @@
                             <td colspan="4" class="p-8 text-center text-gray-500 italic">Belum ada data presensi hari ini.</td>
                         </tr>
                         <?php else: ?>
-                            <?php foreach ($presensiHariIni as$absen): ?>
+                            <?php foreach ($presensiHariIni as $absen): ?>
                             <tr class="border-b border-gray-100 hover:bg-gray-50 transition">
                                 <td class="p-4 font-medium text-gray-800">{{ $absen->user->name }}</td>
                                 <td class="p-4 text-gray-600">{{ $absen->created_at->format('H:i:s') }} WIB</td>
@@ -109,7 +110,7 @@
                             <td colspan="4" class="p-8 text-center text-gray-500 italic">Belum ada riwayat data.</td>
                         </tr>
                         <?php else: ?>
-                            <?php foreach ($riwayatPresensi as$riwayat): ?>
+                            <?php foreach ($riwayatPresensi as $riwayat): ?>
                             <tr class="border-b border-gray-100 hover:bg-gray-50 transition">
                                 <td class="p-4 text-gray-600">{{ $riwayat->created_at->format('d M Y') }}</td>
                                 <td class="p-4 font-medium text-gray-800">{{ $riwayat->user->name }}</td>

@@ -5,21 +5,24 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Models\Presensi;
+use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\View\View;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 final class AdminController extends Controller
 {
     public function index()
     {
-        $hariIni = \Carbon\Carbon::today();
+        $hariIni = Carbon::today();
 
-        $presensiHariIni = \App\Models\Presensi::with('user')
+        $presensiHariIni = Presensi::with('user')
             ->whereDate('created_at', $hariIni)
             ->orderBy('created_at', 'desc')
             ->get();
 
-        $riwayatPresensi = \App\Models\Presensi::with('user')
+        $riwayatPresensi = Presensi::with('user')
             ->whereDate('created_at', '<', $hariIni)
             ->orderBy('created_at', 'desc')
             ->paginate(15); // Pakai halaman (pagination) agar tidak berat jika data ribuan
@@ -31,7 +34,7 @@ final class AdminController extends Controller
     {
         $presensi = Presensi::findOrFail($id);
         $presensi->update(['status' => 'Hadir']); // Ubah status jadi Hadir
-        
+
         return back()->with('success', 'Berhasil ACC! Karyawan ditandai Hadir.');
     }
 
@@ -39,18 +42,18 @@ final class AdminController extends Controller
     {
         $presensi = Presensi::findOrFail($id);
         $presensi->update(['status' => 'Ditolak (Alpa)']); // Ubah status jadi Ditolak
-        
+
         return back()->with('error', 'Presensi Ditolak! Karyawan ditandai Alpa.');
     }
-    
-    public function updateStatus(\Illuminate\Http\Request $request, int $id)
+
+    public function updateStatus(Request $request, int $id)
     {
         // Validasi input untuk memastikan hanya kode yang diizinkan yang bisa masuk ke database
         $request->validate([
-            'status' => 'required|in:Hadir,MT,Sakit,Ijin,TMDL,TMTD,TA,Ditolak (Alpa),Menunggu ACC'
+            'status' => 'required|in:Hadir,MT,Sakit,Ijin,TMDL,TMTD,TA,Ditolak (Alpa),Menunggu ACC',
         ]);
 
-        $presensi = \App\Models\Presensi::findOrFail($id);
+        $presensi = Presensi::findOrFail($id);
         $presensi->status = $request->status;
         $presensi->save();
 
@@ -60,19 +63,19 @@ final class AdminController extends Controller
     public function exportCsv()
     {
         $presensis = Presensi::with('user')->orderBy('waktu_absen', 'desc')->get();
-        $filename = "Laporan_Absensi_DMU_" . date('Y-m-d') . ".csv";
+        $filename = 'Laporan_Absensi_DMU_'.date('Y-m-d').'.csv';
 
         $headers = [
-            "Content-type"        => "text/csv",
-            "Content-Disposition" => "attachment; filename=$filename",
-            "Pragma"              => "no-cache",
-            "Cache-Control"       => "must-revalidate, post-check=0, pre-check=0",
-            "Expires"             => "0"
+            'Content-type' => 'text/csv',
+            'Content-Disposition' => "attachment; filename=$filename",
+            'Pragma' => 'no-cache',
+            'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
+            'Expires' => '0',
         ];
 
-        $columns = ['Nama Karyawan', 'Waktu Scan', 'IP Address', 'Status'];
+        $columns = ['Nama Karyawan', 'Waktu Scan', 'Entitas Perusahaan', 'Status'];
 
-        $callback = function() use($presensis, $columns) {
+        $callback = function () use ($presensis, $columns) {
             $file = fopen('php://output', 'w');
             fputcsv($file, $columns);
 
@@ -80,8 +83,8 @@ final class AdminController extends Controller
                 fputcsv($file, [
                     $presensi->user->name,
                     $presensi->waktu_absen,
-                    $presensi->ip_address,
-                    $presensi->status
+                    $presensi->user->company_entity ?? '-',
+                    $presensi->status,
                 ]);
             }
             fclose($file);
@@ -90,7 +93,7 @@ final class AdminController extends Controller
         return response()->stream($callback, 200, $headers);
     }
 
-    public function storeKaryawan(\Illuminate\Http\Request $request)
+    public function storeKaryawan(Request $request)
     {
         $request->validate([
             'name' => 'required',
@@ -99,10 +102,10 @@ final class AdminController extends Controller
             'company_entity' => 'required',
         ]);
 
-        \App\Models\User::create([
+        User::create([
             'name' => $request->name,
             'email' => $request->email,
-            'password' => \Illuminate\Support\Facades\Hash::make($request->password),
+            'password' => Hash::make($request->password),
             'role' => 'karyawan',
             'company_entity' => $request->company_entity,
         ]);
@@ -112,19 +115,20 @@ final class AdminController extends Controller
 
     public function indexKaryawan()
     {
-        $karyawans = \App\Models\User::where('role', 'karyawan')->get();
+        $karyawans = User::where('role', 'karyawan')->get();
+
         return view('admin.karyawan-index', compact('karyawans'));
     }
 
-    public function updateKaryawan(\Illuminate\Http\Request $request, int $id)
+    public function updateKaryawan(Request $request, int $id)
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . $id,
+            'email' => 'required|email|unique:users,email,'.$id,
             'company_entity' => 'required|string|max:255',
         ]);
 
-        $karyawan = \App\Models\User::findOrFail($id);
+        $karyawan = User::findOrFail($id);
         $karyawan->update([
             'name' => $request->name,
             'email' => $request->email,
@@ -136,7 +140,7 @@ final class AdminController extends Controller
 
     public function destroyKaryawan(int $id)
     {
-        $karyawan = \App\Models\User::findOrFail($id);
+        $karyawan = User::findOrFail($id);
         $karyawan->delete();
 
         return redirect()->back()->with('success', 'Akun karyawan berhasil dihapus.');
